@@ -13,9 +13,11 @@ import {mountMobileContestPage} from "@/ui/pages/contest/MobileContestPage"
 initializeColors(document.documentElement)
 DisplayPaint.initialize(document.documentElement)
 const mobileContest = /^\/contests\/([^/]+)\/?$/.exec(location.pathname)
-if (Browser.isMobile() && mobileContest !== null) {
+const isAndroidTablet = navigator.userAgent.includes("openDAWAndroid")
+    && Math.min(window.screen.width, window.screen.height) >= 600
+if (Browser.isMobile() && !isAndroidTablet && mobileContest !== null) {
     mountMobileContestPage(document.body, mobileContest[1])
-} else if (Browser.isMobile()) {
+} else if (Browser.isMobile() && !isAndroidTablet) {
     const className = Html.adoptStyleSheet(mobileCss, "Mobile")
     document.body.innerHTML = `<div class="${className}">
         <div>
