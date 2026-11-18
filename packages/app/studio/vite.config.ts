@@ -19,7 +19,8 @@ export default defineConfig(({command}) => {
     const isCI = process.env.CI === "true"
     const branchName = process.env.BRANCH_NAME || "main"
     const envFolder = process.env.DEPLOY_ENV || (branchName === "main" ? "main" : "dev")
-    const base = (command === "build" && isCI) ? `/${envFolder}/releases/${uuid}/` : "/"
+    const isAndroidBuild = process.env.ANDROID_BUILD === "true"
+    const base = isAndroidBuild ? "/" : (command === "build" && isCI) ? `/${envFolder}/releases/${uuid}/` : "/"
 
     return {
         base,
