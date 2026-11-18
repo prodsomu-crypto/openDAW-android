@@ -4,6 +4,7 @@
     "CI",
     "BRANCH_NAME",
     "DEPLOY_ENV",
+    "ANDROID_BUILD",
     "VITE_WCLAP_ORIGIN"
   ],
   "tasks": {
