@@ -31,6 +31,12 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 - Fix commit: `fed08e84ead5b9d98b7e2fac7e397e2dd8bcaa1f` (bounded CI workers).
 - Fix commit: `e67dc7e49e1a8e9f35957435b275e979503f8ca4` (mark the private-project diagnostic skipped in automated runs; normal audio render tests remain enabled). The next CI run will validate this change.
 
+## Latest fix
+
+- Corrected both Java compiler errors from run #5 in `android/app/src/main/java/org/opendaw/studio/MainActivity.java`.
+- The workflow stages the built website under `android/app/src/main/assets/www`; the root asset handler serves that subdirectory through the existing `/` route, so the app URL remains `https://appassets.androidplatform.net/index.html`.
+- The next CI run must confirm Gradle compilation and APK artifact upload; no installable APK is confirmed yet.
+
 ## Important constraints / known risks
 
 - No APK has yet been built or installed on a physical Android device.
