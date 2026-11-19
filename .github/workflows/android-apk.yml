@@ -57,6 +57,8 @@ jobs:
         run: npm ci
 
       - name: Build original openDAW Studio and WebAssembly audio engine
+        env:
+          ANDROID_BUILD: "true"
         run: |
           npm run build-wasm
           npm run build
