@@ -428,21 +428,29 @@ export namespace DeviceDialog {
         )
         render()
         renderCard()
-        Promise.all([
-            service.presets.cloudReady,
-            CommunityAPI.get().scripts().then(index => index.scripts, (reason: unknown) => {
-                console.warn(reason)
-                return []
-            }),
-            SpotlightCreate.wclaps(),
-            category === "instrument" ? DeviceCatalog.loadSoundfonts() : Promise.resolve([])
-        ]).then(([_, scripts, wclaps, soundfonts]) => {
-            if (!dialog.open) {return}
-            ready.value = true
-            sources.setValue({presets: service.presets.presets(), scripts, wclaps, soundfonts})
-            currentKey.ifSome(key => Option.wrap(visible.find(entry => entry.kind === "device" && entry.deviceKey === key))
-                .ifSome(select))
-        })
+        // Show built-in devices immediately. Optional cloud catalogues must never keep the
+        // whole picker behind a spinner (for example when a soundfont index is unreachable).
+        ready.value = true
+        sources.setValue({presets: service.presets.presets(), scripts: [], wclaps: [], soundfonts: []})
+        render()
+        currentKey.ifSome(key => Option.wrap(visible.find(entry => entry.kind === "device" && entry.deviceKey === key))
+            .ifSome(select))
+
+        const updateSources = (update: Partial<DeviceCatalog.Sources>): void => {
+            if (dialog.open) {sources.setValue({...sources.getValue(), ...update})}
+        }
+        service.presets.cloudReady.then(() => updateSources({presets: service.presets.presets()}))
+        CommunityAPI.get().scripts()
+            .then(index => updateSources({scripts: index.scripts}))
+            .catch((reason: unknown) => console.warn("Could not load community scripts", reason))
+        SpotlightCreate.wclaps()
+            .then(wclaps => updateSources({wclaps}))
+            .catch((reason: unknown) => console.warn("Could not load WebCLAP catalogue", reason))
+        if (category === "instrument") {
+            DeviceCatalog.loadSoundfonts()
+                .then(soundfonts => updateSources({soundfonts}))
+                .catch((reason: unknown) => console.warn("Could not load soundfonts", reason))
+        }
         if (isDefined(piano)) {armEditing()}
         dialog.addEventListener("close", () => {
             if (!approved.value) {audition.cancel()}
