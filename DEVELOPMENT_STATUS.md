@@ -10,7 +10,7 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 - The Studio app is `packages/app/studio`; its package build runs TypeScript checking and Vite.
 - Audio/DSP functionality includes the Rust/WebAssembly package `packages/studio/core-wasm`.
 - The branch already contains an Android Gradle application, Java WebView host, microphone permission handling, and Android document-picker integration.
-- The native host expects the compiled Studio website at `android/app/src/main/assets/www/index.html` and uses AndroidX WebKit cross-origin isolation APIs for SharedArrayBuffer.
+- The native host loads `https://appassets.androidplatform.net/index.html`; the compiled Studio website must therefore be staged at `android/app/src/main/assets/index.html` for the root `AssetsPathHandler`.
 - Root scripts include `npm run build`, `npm run build-wasm`, and `npm test`. Root Node requirement is >=23.
 - Android app ID is `org.opendaw.studio`; min SDK 26, target SDK 35, compile SDK 36, Java 17, Android Gradle Plugin 8.13.2.
 - Continue only on `android/phase-1-apk-foundation`. Do not switch to or overwrite `main`.
@@ -34,8 +34,8 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 ## Latest fix
 
 - Corrected both Java compiler errors from run #5 in `android/app/src/main/java/org/opendaw/studio/MainActivity.java`.
-- The workflow stages the built website under `android/app/src/main/assets/www`; the root asset handler serves that subdirectory through the existing `/` route, so the app URL remains `https://appassets.androidplatform.net/index.html`.
-- The next CI run must confirm Gradle compilation and APK artifact upload; no installable APK is confirmed yet.
+- The first successful APK build exposed a physical-device launch issue: the workflow placed the site in `assets/www/`, while the root `AssetsPathHandler` maps `/index.html` to `assets/index.html`. This caused the WebView `ERR_INVALID_RESPONSE` shown on the user's tablet.
+- Corrected the workflow to stage the Vite output directly into `android/app/src/main/assets/`, matching the root asset handler and preserving the app URL. A fresh CI build and tablet launch test are required to validate the fix.
 
 ## Important constraints / known risks
 
@@ -51,7 +51,7 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 
 1. Confirm both CI test fixes by running the cloud pipeline again.
 2. If tests pass, complete Gradle debug APK assembly and upload.
-3. Verify APK installation and launch on a real Android tablet; record device, Android, and WebView versions and observed behavior.
+3. Download the rebuilt APK after the asset-path fix, then verify launch on a real Android tablet; record device, Android, and WebView versions and observed behavior.
 4. Audit existing touch/pointer handling and responsive CSS before adding tablet gestures.
 5. Add focused tablet improvements without breaking mouse/keyboard workflows.
 6. Add automated UI tests where practical; keep audio latency and interruption testing device-based.
