@@ -1,0 +1,84 @@
+name: Android APK
+
+on:
+  push:
+    branches:
+      - android/phase-1-apk-foundation
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    name: Build openDAW Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: npm
+
+      - name: Set up Rust (nightly)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-unknown
+          components: rust-src
+
+      - name: Install binaryen
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binaryen
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Build original openDAW Studio and WebAssembly audio engine
+        run: |
+          npm run build-wasm
+          npm run build
+
+      - name: Stage web application for Android WebView
+        run: |
+          test -f packages/app/studio/dist/index.html
+          mkdir -p android/app/src/main/assets/www
+          cp -a packages/app/studio/dist/. android/app/src/main/assets/www/
+          test -f android/app/src/main/assets/www/index.html
+
+      - name: Run Studio unit tests
+        run: npm test --workspace=@opendaw/app-studio
+
+      - name: Build debug APK
+        working-directory: android
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: openDAW-android-debug-${{ github.sha }}
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
