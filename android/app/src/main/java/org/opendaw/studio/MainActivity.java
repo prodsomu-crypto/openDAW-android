@@ -48,7 +48,7 @@ public final class MainActivity extends Activity {
 
     private final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
             .setDomain("appassets.androidplatform.net")
-            .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(this, "www"))
+            .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(this))
             .build();
 
     @Override
@@ -253,7 +253,7 @@ public final class MainActivity extends Activity {
     }
 
     @Override
-    protected void onRequestPermissionsResult(
+    public void onRequestPermissionsResult(
             int requestCode,
             String[] permissions,
             int[] grantResults) {
