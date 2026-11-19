@@ -68,7 +68,7 @@ jobs:
           cp -a packages/app/studio/dist/. android/app/src/main/assets/www/
           test -f android/app/src/main/assets/www/index.html
 
-      - name: Run Studio unit tests
+      - name: Run existing monorepo tests
         run: npm test
 
       - name: Build debug APK
