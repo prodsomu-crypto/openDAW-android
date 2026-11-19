@@ -19,8 +19,8 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 
 - [x] Inspected repository metadata, active branches, Android foundation files, Studio package metadata, and WASM package metadata.
 - [x] Confirmed the Android wrapper and the existing WebView integration are already present.
-- [ ] Add/verify cloud APK build workflow (current task).
-- [ ] Run the first cloud build and fix any actual build errors.
+- [x] Added `.github/workflows/android-apk.yml` for push/manual cloud builds, Rust/WASM + Studio build, asset staging, existing monorepo tests, Gradle APK assembly, and downloadable artifact upload.
+- [ ] Run the first cloud build and fix any actual build errors (workflow run #2 is queued; see Actions link below).
 
 ## Important constraints / known risks
 
@@ -32,7 +32,7 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 - The foundation branch's Android project does not yet include a Gradle wrapper in the inspected files; CI should provision Gradle explicitly unless a wrapper is added later.
 - The repository contains a very large existing DAW codebase and build graph. Avoid broad rewrites.
 
-## Next steps (in order)
+## Latest CI run\n\n- Workflow: [Android APK run #2](https://github.com/prodsomu-crypto/openDAW-android/actions/runs/44445482378)\n- Commit: `de57a86f02d6ef80c060e1810b51270cf0f41bc9`\n- Status at last check: queued; no build result or APK artifact yet.\n\n## Next steps (in order)
 
 1. Add a GitHub Actions workflow that installs Node 23+, Rust nightly + `wasm32-unknown-unknown` + `rust-src`, builds the original Studio app/WASM, copies the Vite output into Android assets, builds a debug APK, and uploads it as an artifact.
 2. Trigger the workflow and inspect logs. Fix build issues before changing app behavior.
