@@ -22,13 +22,14 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 - [x] Confirmed the first CI run successfully installed dependencies, built the original Studio app and WebAssembly engine, and staged the WebView assets.
 - [x] Diagnosed the first CI failure: 1,176 tests passed, but Vitest reported one worker RPC timeout in `@opendaw/studio-core`.
 - [x] Bounded Vitest worker concurrency to 2 (minimum 1) on CI in `packages/studio/core/vitest.config.ts` to reduce runner contention.
+- [x] Isolated `hit-od-render.test.ts` from automated CI with `describe.skip`: it is a developer-only diagnostic that requires an untracked personal project at a hard-coded macOS path and writes to a personal Downloads directory.
 
 ## Latest CI run
 
-- [Android APK run #3](https://github.com/prodsomu-crypto/openDAW-android/actions/runs/44445514553) failed at the test step; Gradle was skipped.
-- The Rust/WASM + Studio build and Android asset staging steps passed.
-- Failure detail: Vitest unhandled error `[vitest-worker]: Timeout calling "onTaskUpdate"`; 113 test files and 1,176 tests had passed before the worker error.
-- Fix commit: `fed08e84ead5b9d98b7e2fac7e397e2dd8bcaa1f` (CI worker limit). A fresh run should verify whether this resolves the timeout.
+- [Android APK run #3](https://github.com/prodsomu-crypto/openDAW-android/actions/runs/44445514553) hit a Vitest worker timeout.
+- [Android APK run #4](https://github.com/prodsomu-crypto/openDAW-android/actions/runs/44446759201) verified the worker-limit change removed that timeout. It reached 150 passing test files / 806 passing tests, then failed on `hit-od-render.test.ts` because it references a developer-only `/Users/.../hit.od` file that is not in the repository and a local Downloads output path.
+- Fix commit: `fed08e84ead5b9d98b7e2fac7e397e2dd8bcaa1f` (bounded CI workers).
+- Fix commit: `e67dc7e49e1a8e9f35957435b275e979503f8ca4` (mark the private-project diagnostic skipped in automated runs; normal audio render tests remain enabled). The next CI run will validate this change.
 
 ## Important constraints / known risks
 
@@ -42,7 +43,7 @@ Base commit inspected: `cb79c995af18245055363bf0a3320049dec997b4`
 
 ## Next steps (in order)
 
-1. Confirm the worker-limit fix by running the cloud pipeline again.
+1. Confirm both CI test fixes by running the cloud pipeline again.
 2. If tests pass, complete Gradle debug APK assembly and upload.
 3. Verify APK installation and launch on a real Android tablet; record device, Android, and WebView versions and observed behavior.
 4. Audit existing touch/pointer handling and responsive CSS before adding tablet gestures.
