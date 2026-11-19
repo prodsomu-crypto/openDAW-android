@@ -80,8 +80,7 @@ public final class MainActivity extends Activity {
 
         configureWebView();
         setContentView(webView);
-        // Start at the SPA root: /index.html is not a registered Studio route and renders the app's 404 page.
-        webView.loadUrl(APP_ORIGIN + "/");
+        webView.loadUrl(APP_ORIGIN + "/index.html");
     }
 
     private void configureWebView() {
