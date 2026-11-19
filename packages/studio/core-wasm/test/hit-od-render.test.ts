@@ -9,7 +9,9 @@ import {connectSyncToEngine} from "./helpers/connect-sync"
 
 const SR = 48000
 
-describe("hit.od studio render", () => {
+// Manual diagnostic only: this test depends on a private local project and writes to a developer-specific Downloads path.
+// Keep it out of portable CI; ordinary engine rendering coverage lives in the shared test suite.
+describe.skip("hit.od studio render (manual local diagnostic)", () => {
     it("renders and dumps", async () => {
         const raw = readFileSync("/Users/am/Repositories/andre.michelle/openDAW/test-files/probe/synthlib/hit.od")
         const {boxGraph} = ProjectSkeleton.decode(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength) as ArrayBuffer)
